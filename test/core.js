@@ -43,16 +43,16 @@ describe('Bulldog', function(){
   	it('should allow event subscriptions');
   	it('should allow us to subscribe to "change", "look", and "error"');
 
-  	describe('#on change', function(done){
-  		it('should pass something to the callback (cannot be null)', function(){
+  	describe('#on change', function(){
+  		it('should pass something to the callback (cannot be null)', function(done){
 	  		dog.on('change', function(obj){
 	  			obj.should.not.be.empty;
 					done();  			
 	  		});	
   		});  		
   	});
-  	describe('#on look', function(done){
-  		it('should pass something to the callback (cannot be null)', function(){
+  	describe('#on look', function(){
+  		it('should pass something to the callback (cannot be null)', function(done){
 	  		dog.on('look', function(obj){
 	  			obj.should.not.be.empty;
 					done();  			
