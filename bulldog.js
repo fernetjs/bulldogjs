@@ -1,20 +1,19 @@
-
 var request = require('request');
 
-
-function Bulldog(url, interval){
+function Bulldog(url, interval, opt){
 	this.url = url;
 	this.interval = interval;
+	this.options = opt;
 	this.events = {};
 	this.lastBody = "";
 
 	function makeRequest(){
 
-		if (this.events["look"]){
-			this.events["look"]();
-		}
-
 		request(url, function (error, response, body) {
+			if (this.events["look"]){
+				this.events["look"]();
+			}
+
 		  if (!error && response.statusCode == 200) {
 		  	if (body != lastBody){
 			    if (this.events["change"]){
@@ -35,8 +34,8 @@ function Bulldog(url, interval){
 
 module.exports = Bulldog;
 
-Bulldog.watch = function(url, interval){
-	return new Bulldog(url, interval);
+Bulldog.watch = function(url, interval, opt){
+	return new Bulldog(url, interval, opt);
 };
 
 Bulldog.prototype = {
