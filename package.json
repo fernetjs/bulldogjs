@@ -1,0 +1,25 @@
+{
+  "name": "bulldogjs",
+  "version": "0.0.0",
+  "description": "release some dogs to watch the internet for you",
+  "main": "bulldog.js",
+  "dependencies": {
+    "mocha": "*",
+    "should": "*"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/fernetjs/bulldogjs.git"
+  },
+  "keywords": [
+    "watcher",
+    "scrapper"
+  ],
+  "license": "MIT"
+}
