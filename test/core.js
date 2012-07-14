@@ -23,20 +23,47 @@ describe('Bulldog', function(){
     });
     it('should make GET requests when no options is provided');
   });
+  
   describe('#on()', function(){
+  	var dog, 
+  		testServer = require('http').createServer(function (req, res) {
+	  		res.writeHead(200, {'Content-Type': 'text/plain'});
+	  		res.end('TEST :D\n');
+			});
+
+  	before(function(){
+  		testServer.listen(3001, '127.0.0.1');
+  		dog = Bulldog.watch('http://localhost:3001/', 1000);
+  	});
+  	
+  	after(function(){
+  		testServer.close();
+  	});
+
   	it('should allow event subscriptions');
   	it('should allow us to subscribe to "change", "look", and "error"');
-  	describe('#on change', function(){
 
-
+  	describe('#on change', function(done){
+  		it('should pass something to the callback (cannot be null)', function(){
+	  		dog.on('change', function(obj){
+	  			obj.should.not.be.empty;
+					done();  			
+	  		});	
+  		});  		
   	});
-  	describe('#on look', function(){
-
-
+  	describe('#on look', function(done){
+  		it('should pass something to the callback (cannot be null)', function(){
+	  		dog.on('look', function(obj){
+	  			obj.should.not.be.empty;
+					done();  			
+	  		});	
+  		});
+  		it('');
   	});
   	describe('#on error', function(){
 
 
   	});
   });
+
 });
