@@ -5,7 +5,8 @@
   "main": "bulldog.js",
   "dependencies": {
     "mocha": "*",
-    "should": "*"
+    "should": "*",
+    "request": "2.9.x"
   },
   "directories": {
     "test": "test"
