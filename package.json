@@ -6,7 +6,8 @@
   "dependencies": {
     "mocha": "*",
     "should": "*",
-    "request": "2.9.x"
+    "request": "2.9.x",
+    "jsdom": "0.2.x"
   },
   "directories": {
     "test": "test"
