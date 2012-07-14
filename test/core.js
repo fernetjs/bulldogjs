@@ -46,7 +46,7 @@ describe('Bulldog', function(){
   	describe('#on change', function(){
   		it('should pass something to the callback (cannot be null)', function(done){
 	  		dog.on('change', function(obj){
-	  			obj.should.not.be.empty;
+	  			should.exist(obj);
 					done();  			
 	  		});	
   		});  		
@@ -54,11 +54,10 @@ describe('Bulldog', function(){
   	describe('#on look', function(){
   		it('should pass something to the callback (cannot be null)', function(done){
 	  		dog.on('look', function(obj){
-	  			obj.should.not.be.empty;
-					done();  			
+	  			should.exist(obj);
+					done();
 	  		});	
   		});
-  		it('');
   	});
   	describe('#on error', function(){
 
