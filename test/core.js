@@ -14,12 +14,11 @@ describe('Bulldog', function(){
     	dog.interval.should.be.a('number');
     	dog.interval.should.equal(10000);
     });
-    it('should allow an optional 3rd parameter for http request options', function(){
-    	var dog = Bulldog.watch('http://fernetjs.com', 10000, {
-    		method: 'POST',
-    		timeout: 10000    			
-    	});
-    });
+    it('should allow an optional 3rd parameter for http request options');
+    	// var dog = Bulldog.watch('http://fernetjs.com', 10000, {
+    	// 	method: 'POST',
+    	// 	timeout: 10000    			
+    	// });
     it('should make get requests when no options is provided');
   });
   describe('#on()', function(){
