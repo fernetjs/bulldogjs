@@ -9,15 +9,18 @@ function Dog(options){
 	this.events = {};
 	this.lastHtml = options.html;
 
-	var self = this;
-	this.timer = setInterval(function(){
-		self.makeRequest();
-	}, this.interval);
+	this.start();
 };
 
 module.exports = Dog;
 
 Dog.prototype = {
+	start: function(){
+		var self = this;
+		this.timer = setInterval(function(){
+			self.makeRequest();
+		}, this.interval);
+	},
 	on: function(name, selector, callback){
 		
 		if (name === 'change'){
@@ -66,6 +69,9 @@ Dog.prototype = {
 	},
 	wait: function(){
 		clearInterval(this.timer);
+	},
+	resume: function(){
+		this.start();
 	},
 	makeRequest: function(){
 		var self = this;

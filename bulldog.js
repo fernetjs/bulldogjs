@@ -37,6 +37,13 @@ module.exports = {
 		}
 
 		return this;
+	},
+	resumeWatching: function(){
+		for(var i=0; i< dogs.length; i++){
+			dogs[i].resume();
+		}
+
+		return this;
 	}
 };
 

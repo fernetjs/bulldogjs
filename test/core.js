@@ -95,4 +95,48 @@ describe('Bulldog', function(){
     });
   });
 
+  describe('#resumeWatching()', function(){
+    it('should resume making requests', function (done){
+      var timesCalled = 0;
+      
+      bulldog.watch('http://localhost:3002/try1', 500, function(error, dog){
+        should.not.exist(error);
+        should.exist(dog);
+
+        dog.on('look', function(){
+          timesCalled++;
+        });
+
+      });
+
+      bulldog.watch('http://localhost:3002/try2', 500, function(error, dog){
+        should.not.exist(error);
+        should.exist(dog);
+
+        dog.on('look', function(){
+          timesCalled++;
+        });
+
+      });
+
+      setTimeout(function(){
+        bulldog.stopWatching();
+
+        setTimeout(function(){
+          timesCalled.should.be.equal(2);
+
+          bulldog.resumeWatching();          
+
+          setTimeout(function(){
+            timesCalled.should.be.equal(4);
+            done();
+          }, 600);
+
+        }, 1000);
+
+      }, 600);
+      
+    });
+  });
+
 });
