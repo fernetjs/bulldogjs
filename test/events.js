@@ -2,10 +2,16 @@ var should = require('should'),
   bulldog = require('../lib/bulldog.js');
 
 describe('Events', function(){
-  var dog, 
+  var dog,
+    bodyResponses = {
+      base: '<html><body><span id="cats">catssss</span><span id="unicorns">unicornssss</span></body></html>',
+      catification: '<html><body><span id="cats">cat cat cat cat</span><span id="unicorns">unicornssss</span></body></html>',
+      unicornication: '<html><body><span id="cats">catssss</span><span id="unicorns">unicorns. just unicorns.</span></body></html>'
+    },
+    currentResponse = bodyResponses.base,
     testServer = require('http').createServer(function (req, res) {
       res.writeHead(200, {'Content-Type': 'text/html'});
-      res.end('<html><body><span id="cats">catssss</span><span id="unicorns">unicornssss</span></body></html>');
+      res.end(currentResponse);
     });
   
   beforeEach(function(done){
@@ -32,10 +38,11 @@ describe('Events', function(){
 
   describe('change', function(){
     it('should pass something to the callback (cannot be null)', function(done){
-      //TODO: change server response timely so we can test the "change" call here
+      setTimeout(function(){ currentResponse = bodyResponses.catification; }, 150);
       dog.on('change', function(obj){
         should.exist(obj);
         dog.off('change');
+        currentResponse = bodyResponses.base;
         done();
       });
     });
@@ -53,16 +60,16 @@ describe('Events', function(){
       var callsCount = 0;
 
       bulldog.watch('http://localhost:3001/', 100, function(error, puppy){
-
+        setTimeout(function(){ currentResponse = bodyResponses.catification; }, 150);
         setTimeout(function(){
-          //TODO: change server response timely so we can test nbr of "change" calls here
-          callsCount.should.equal(0);
+          callsCount.should.equal(1);
           done();
         }, 350);
 
         puppy.on('change', function(){
           callsCount++;
           puppy.off('change');
+          currentResponse = bodyResponses.base;
         });
 
       });
@@ -70,9 +77,8 @@ describe('Events', function(){
     it('should allow to add and remove the handler for calls providing selectors', function(done){
       var callsCount = 0;
       bulldog.watch('http://localhost:3001/', 100, function(error, puppy){
-
+        setTimeout(function(){ currentResponse = bodyResponses.unicornication; }, 150);
         setTimeout(function(){
-          //TODO: change server response timely so we can test nbr of "change" calls here
           callsCount.should.equal(0);
           done();
         }, 350);
@@ -80,6 +86,7 @@ describe('Events', function(){
         puppy.on('change', '#unicorns', function(){
           callsCount++;
           puppy.off('change', '#unicorns');
+          currentResponse = bodyResponses.base;
         });
       });
     });
@@ -89,6 +96,13 @@ describe('Events', function(){
         generalCallsCount = 0;
       
       bulldog.watch('http://localhost:3001/', 100, function(error, puppy){
+
+        setTimeout(function(){ 
+          currentResponse = bodyResponses.catification; 
+          setTimeout(function(){ 
+            currentResponse = bodyResponses.unicornication; 
+          }, 80);
+        }, 80);
 
         puppy.on('change', '#cats', function(){
           catsCallsCount++;
@@ -106,10 +120,10 @@ describe('Events', function(){
         });
 
         setTimeout(function(){
-          //TODO: change server response timely so we can test nbr of "change" calls here
-          catsCallsCount.should.equal(0);
-          unicornsCallsCount.should.equal(0);
-          generalCallsCount.should.equal(0);
+          catsCallsCount.should.equal(1);
+          unicornsCallsCount.should.equal(1);
+          generalCallsCount.should.equal(2);
+          currentResponse = bodyResponses.base; 
           done();
         }, 350);
         

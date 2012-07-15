@@ -99,7 +99,7 @@ describe('Bulldog', function(){
     it('should resume making requests', function (done){
       var timesCalled = 0;
       
-      bulldog.watch('http://localhost:3002/try1', 500, function(error, dog){
+      bulldog.watch('http://localhost:3002/try1', 50, function(error, dog){
         should.not.exist(error);
         should.exist(dog);
 
@@ -109,7 +109,7 @@ describe('Bulldog', function(){
 
       });
 
-      bulldog.watch('http://localhost:3002/try2', 500, function(error, dog){
+      bulldog.watch('http://localhost:3002/try2', 50, function(error, dog){
         should.not.exist(error);
         should.exist(dog);
 
@@ -123,18 +123,18 @@ describe('Bulldog', function(){
         bulldog.stopWatching();
 
         setTimeout(function(){
-          timesCalled.should.be.equal(2);
+          timesCalled.should.be.equal(4);
 
           bulldog.resumeWatching();          
 
           setTimeout(function(){
-            timesCalled.should.be.equal(4);
+            timesCalled.should.be.equal(8);
             done();
-          }, 600);
+          }, 90);
 
-        }, 1000);
+        }, 30);
 
-      }, 600);
+      }, 120);
       
     });
   });
