@@ -5,7 +5,7 @@ describe('Events', function(){
   var dog, 
       testServer = require('http').createServer(function (req, res) {
         res.writeHead(200, {'Content-Type': 'text/plain'});
-        res.end('<html><body><span>HOLA</span></body></html>');
+        res.end('<html><body><span id="cats">catssss</span><span id="unicorns">unicornssss</span></body></html>');
       });
   
   beforeEach(function(){
@@ -29,6 +29,7 @@ describe('Events', function(){
 
   describe('change', function(){
     it('should pass something to the callback (cannot be null)', function(done){
+      //TODO: change server response timely so we can test the "change" call here
       dog.on('change', function(obj){
         should.exist(obj);
         dog.off('change');

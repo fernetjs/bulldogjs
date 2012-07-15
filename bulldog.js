@@ -42,7 +42,10 @@ Bulldog.prototype = {
 			else cb = selector;
 
 			newEv.callback = cb;
-			this.events[name].push(newEv);
+			var self = this;
+			this.setCurrentState(newEv, function (){
+				self.events[name].push(newEv);	
+			});
 		}
 		else {
 			this.events[name] = selector;	
@@ -58,7 +61,7 @@ Bulldog.prototype = {
 
 				for (var i=0; i< changeEvents.length; i++){
 					if (changeEvents[i].selector === selector) {
-							this.events[name].splice(i, 1);
+						this.events[name].splice(i, 1);
 						break;
 					}
 				}
@@ -100,13 +103,15 @@ Bulldog.prototype = {
 					this.lastBody = html;
 				}
 				else {
-					var result = window.document.querySelectorAll(changeEvents[i].selector);
+					var result = window.document.querySelector(changeEvents[i].selector);
 					var lastResult = changeEvents[i].lastResult;
-					
+
+					if (result) 
+						result = result.outerHTML;
+
 					if (result != lastResult){
 						changeEvents[i].callback(result, lastResult);
-						if (changeEvents[i])
-							changeEvents[i].lastResult = result;
+						changeEvents[i].lastResult = result;
 					}
 				}
 			}
@@ -117,6 +122,30 @@ Bulldog.prototype = {
 	initBrowserWindow: function(html){
     var document = jsdom.jsdom(html, null, { features: { QuerySelector : true	}}); 
     return document.createWindow();
+	},
+	setCurrentState: function(changeEvt, cb){
+		var self = this;
+
+		request(self.url, function (error, response, body) {
+			if (!error && response.statusCode == 200) {
+				var html = body;
+				
+				var window = self.initBrowserWindow(html);
+
+				if (!changeEvt.selector) {
+					self.lastBody = html;
+				}
+				else {
+					var result = window.document.querySelector(changeEvt.selector);
+					if (result) 
+						result = result.outerHTML;
+
+					changeEvt.lastResult = result;
+				}
+			}
+
+			cb();
+		});
 	}
 };
 
