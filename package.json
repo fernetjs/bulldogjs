@@ -1,16 +1,19 @@
 {
   "name": "bulldogjs",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "release some dogs to watch the internet for you",
   "main": "bulldog.js",
+  "homepage": "http://some-domain.com",
   "dependencies": {
-    "mocha": "*",
-    "should": "*",
     "request": "2.9.x",
     "jsdom": "0.2.x"
   },
-  "directories": {
-    "test": "test"
+  "devDependencies": {
+    "mocha": "*",
+    "should": "*"
+  },
+  "directories": { 
+    "lib" : "./lib"
   },
   "scripts": {
     "test": "mocha"
@@ -19,9 +22,13 @@
     "type": "git",
     "url": "git://github.com/fernetjs/bulldogjs.git"
   },
-  "keywords": [
-    "watcher",
-    "scrapper"
-  ],
+  "bugs": {
+    "web": "git://github.com/fernetjs/bulldogjs/issues" 
+  },
+  "engines": {
+    "node": "~v0.8.x"
+  },
+  "tags": ["bulldog", "bulldogjs", "watcher", "web watcher", "site watcher"],
+  "keywords": ["bulldog", "bulldogjs", "watcher", "web watcher", "site watcher"],
   "license": "MIT"
 }

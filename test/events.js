@@ -1,5 +1,5 @@
 var should = require('should'),
-  bulldog = require('../bulldog.js');
+  bulldog = require('../lib/bulldog.js');
 
 describe('Events', function(){
   var dog, 
