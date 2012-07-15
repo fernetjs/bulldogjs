@@ -40,7 +40,7 @@ module.exports = {
 	},
 	resumeWatching: function(){
 		for(var i=0; i< dogs.length; i++){
-			dogs[i].resume();
+			dogs[i].start();
 		}
 
 		return this;

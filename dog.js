@@ -21,6 +21,9 @@ Dog.prototype = {
 			self.makeRequest();
 		}, this.interval);
 	},
+	wait: function(){
+		clearInterval(this.timer);
+	},
 	on: function(name, selector, callback){
 		
 		if (name === 'change'){
@@ -66,12 +69,6 @@ Dog.prototype = {
 		}	
 
 		return this;
-	},
-	wait: function(){
-		clearInterval(this.timer);
-	},
-	resume: function(){
-		this.start();
 	},
 	makeRequest: function(){
 		var self = this;
