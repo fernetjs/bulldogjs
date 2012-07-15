@@ -31,8 +31,11 @@ module.exports = {
 
 		return this;
 	},
-	stopWatch: function(){
-		//clearInterval for each Dog
+	stopWatching: function(){
+		for(var i=0; i< dogs.length; i++){
+			dogs[i].wait();
+		}
+
 		return this;
 	}
 };

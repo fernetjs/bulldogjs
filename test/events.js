@@ -4,7 +4,7 @@ var should = require('should'),
 describe('Events', function(){
   var dog, 
     testServer = require('http').createServer(function (req, res) {
-      res.writeHead(200, {'Content-Type': 'text/plain'});
+      res.writeHead(200, {'Content-Type': 'text/html'});
       res.end('<html><body><span id="cats">catssss</span><span id="unicorns">unicornssss</span></body></html>');
     });
   

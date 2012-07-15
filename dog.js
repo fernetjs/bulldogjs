@@ -64,6 +64,9 @@ Dog.prototype = {
 
 		return this;
 	},
+	wait: function(){
+		clearInterval(this.timer);
+	},
 	makeRequest: function(){
 		var self = this;
 
