@@ -1,16 +1,19 @@
 var should = require('should'),
-  Bulldog = require('../bulldog.js');
+  bulldog = require('../bulldog.js');
 
 describe('Events', function(){
   var dog, 
-      testServer = require('http').createServer(function (req, res) {
-        res.writeHead(200, {'Content-Type': 'text/plain'});
-        res.end('<html><body><span id="cats">catssss</span><span id="unicorns">unicornssss</span></body></html>');
-      });
+    testServer = require('http').createServer(function (req, res) {
+      res.writeHead(200, {'Content-Type': 'text/plain'});
+      res.end('<html><body><span id="cats">catssss</span><span id="unicorns">unicornssss</span></body></html>');
+    });
   
-  beforeEach(function(){
+  beforeEach(function(done){
     testServer.listen(3001, '127.0.0.1');
-    dog = Bulldog.watch('http://localhost:3001/', 1000);
+    bulldog.watch('http://localhost:3001/', 1000, function(error, theDog){
+      dog = theDog;
+      done();
+    });
   });
   
   afterEach(function(){
@@ -47,57 +50,70 @@ describe('Events', function(){
       dog.off('change', 'div.info');
     });
     it('should allow to add and remove the handler', function(done){
-      var callsCount = 0,
-        puppy = Bulldog.watch('http://localhost:3001/', 100);
-      setTimeout(function(){
-        //TODO: change server response timely so we can test nbr of "change" calls here
-        callsCount.should.equal(0);
-        done();
-      }, 350);
-      puppy.on('change', function(){
-        callsCount++;
-        puppy.off('change');
+      var callsCount = 0;
+
+      bulldog.watch('http://localhost:3001/', 100, function(error, puppy){
+
+        setTimeout(function(){
+          //TODO: change server response timely so we can test nbr of "change" calls here
+          callsCount.should.equal(0);
+          done();
+        }, 350);
+
+        puppy.on('change', function(){
+          callsCount++;
+          puppy.off('change');
+        });
+
       });
     });
     it('should allow to add and remove the handler for calls providing selectors', function(done){
-      var callsCount = 0,
-        puppy = Bulldog.watch('http://localhost:3001/', 100);
-      setTimeout(function(){
-        //TODO: change server response timely so we can test nbr of "change" calls here
-        callsCount.should.equal(0);
-        done();
-      }, 350);
-      puppy.on('change', '#unicorns', function(){
-        callsCount++;
-        puppy.off('change', '#unicorns');
+      var callsCount = 0;
+      bulldog.watch('http://localhost:3001/', 100, function(error, puppy){
+
+        setTimeout(function(){
+          //TODO: change server response timely so we can test nbr of "change" calls here
+          callsCount.should.equal(0);
+          done();
+        }, 350);
+        
+        puppy.on('change', '#unicorns', function(){
+          callsCount++;
+          puppy.off('change', '#unicorns');
+        });
       });
     });
     it('should handle each change event for each selector independently', function(done){
       var catsCallsCount = 0,
         unicornsCallsCount = 0,
-        generalCallsCount = 0,
-        puppy = Bulldog.watch('http://localhost:3001/', 100);
+        generalCallsCount = 0;
+      
+      bulldog.watch('http://localhost:3001/', 100, function(error, puppy){
 
-      puppy.on('change', '#cats', function(){
-        catsCallsCount++;
-        puppy.off('change', '#content');
-      });
-      puppy.on('change', '#unicorns', function(){
-        unicornsCallsCount++;
-        puppy.off('change', '#content');
-      });
-      puppy.on('change', function(){
-        unicornsCallsCount++;
-        puppy.off('change', '#content');
-      });
-      setTimeout(function(){
-        //TODO: change server response timely so we can test nbr of "change" calls here
-        catsCallsCount.should.equal(0);
-        unicornsCallsCount.should.equal(0);
-        generalCallsCount.should.equal(0);
-        done();
-      }, 350);
+        puppy.on('change', '#cats', function(){
+          catsCallsCount++;
+          puppy.off('change', '#content');
+        });
 
+        puppy.on('change', '#unicorns', function(){
+          unicornsCallsCount++;
+          puppy.off('change', '#content');
+        });
+
+        puppy.on('change', function(){
+          unicornsCallsCount++;
+          puppy.off('change', '#content');
+        });
+
+        setTimeout(function(){
+          //TODO: change server response timely so we can test nbr of "change" calls here
+          catsCallsCount.should.equal(0);
+          unicornsCallsCount.should.equal(0);
+          generalCallsCount.should.equal(0);
+          done();
+        }, 350);
+        
+      });
     });
     it('should be called if something changed');
     it('should NOT be called if things remain the same');

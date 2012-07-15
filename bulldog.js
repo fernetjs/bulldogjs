@@ -1,152 +1,39 @@
 
 var request = require('request'),
-	jsdom = require('jsdom');
+	Dog = require('./dog.js');
 
-function Bulldog(url, interval, opt){
-	this.url = url;
-	this.interval = interval;
-	this.options = opt;
-	this.events = {};
-	this.lastBody = "";
+var dogs = [];
 
-	var self = this;
-	this.timer = setInterval(function(){
-		self.makeRequest();
-	}, interval);
-};
-
-module.exports = Bulldog;
-
-Bulldog.watch = function(url, interval, opt){
-	return new Bulldog(url, interval, opt);
-};
-
-Bulldog.stopWatch = function(){
-	clearInterval(this.timer);
-	//TODO: destroy or has a startWatch to resume?
-	return this;
-};
-
-Bulldog.prototype = {
-	on: function(name, selector, callback){
+module.exports = {
+	watch: function(url, interval, callback){
 		
-		if (name === 'change'){
-			this.events[name] = this.events[name] || [];
-			var cb = callback;
-
-			var newEv = {};
-
-			if (typeof selector == "string") {
-				newEv.selector = selector;
-			}
-			else cb = selector;
-
-			newEv.callback = cb;
-			var self = this;
-			this.setCurrentState(newEv, function (){
-				self.events[name].push(newEv);	
-			});
-		}
-		else {
-			this.events[name] = selector;	
+		if (typeof interval !== 'number'){
+			callback(new Error('Interval parameter must be a Number'));
+			return;
 		}
 
-		return this;
-	},
-	off: function(name, selector){
-		if (this.events[name]) {
-			
-			if (name === 'change') {
-				var changeEvents = this.events[name];
+		request(url, function (error, response, body) {
+			if (!error) {
+				var dog = new Dog({
+					url: url,
+					interval: interval,
+					html: body
+				});
 
-				for (var i=0; i< changeEvents.length; i++){
-					if (changeEvents[i].selector === selector) {
-						this.events[name].splice(i, 1);
-						break;
-					}
-				}
-			}
-			else 
-				delete this.events[name];
-		}	
+	  		dogs.push(dog);
 
-		return this;
-	},
-	makeRequest: function(){
-		var self = this;
-
-		request(self.url, function (error, response, body) {
-			if (self.events["look"]){
-				self.events["look"](body);
-			}
-
-		  if (!error && response.statusCode == 200) {
-	  		self.updateChangeEvents(body);
+	  		callback(null, dog);
 		  }
 		  else {
-		  	if (self.events["error"]){
-					self.events["error"](error, response.statusCode);
-				}
+		  	callback(error);
 		  }
 		});
+
+		return this;
 	},
-	updateChangeEvents: function(html){
-		var changeEvents = this.events['change'];
-		if (changeEvents && changeEvents.length > 0 && html != this.lastBody) {
-	
-			var window = this.initBrowserWindow(html);
-
-			for(var i=0; i<changeEvents.length; i++) {
-				
-				if (!changeEvents[i].selector) {
-					changeEvents[i].callback(html, this.lastBody);
-					this.lastBody = html;
-				}
-				else {
-					var result = window.document.querySelector(changeEvents[i].selector);
-					var lastResult = changeEvents[i].lastResult;
-
-					if (result) 
-						result = result.outerHTML;
-
-					if (result != lastResult){
-						changeEvents[i].callback(result, lastResult);
-						changeEvents[i].lastResult = result;
-					}
-				}
-			}
-
-			window.close();
-		}
-	},
-	initBrowserWindow: function(html){
-    var document = jsdom.jsdom(html, null, { features: { QuerySelector : true	}}); 
-    return document.createWindow();
-	},
-	setCurrentState: function(changeEvt, cb){
-		var self = this;
-
-		request(self.url, function (error, response, body) {
-			if (!error && response.statusCode == 200) {
-				var html = body;
-				
-				var window = self.initBrowserWindow(html);
-
-				if (!changeEvt.selector) {
-					self.lastBody = html;
-				}
-				else {
-					var result = window.document.querySelector(changeEvt.selector);
-					if (result) 
-						result = result.outerHTML;
-
-					changeEvt.lastResult = result;
-				}
-			}
-
-			cb();
-		});
+	stopWatch: function(){
+		//clearInterval for each Dog
+		return this;
 	}
 };
-
 
