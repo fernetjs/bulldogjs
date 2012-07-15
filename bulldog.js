@@ -1,8 +1,6 @@
 
 var request = require('request'),
 	jsdom = require('jsdom');
-	
-jsdom.defaultDocumentFeatures = { QuerySelector : true	};
 
 function Bulldog(url, interval, opt){
 	this.url = url;
@@ -20,25 +18,35 @@ function Bulldog(url, interval, opt){
 			}
 
 		  if (!error && response.statusCode == 200) {
-		  	if (body != self.lastBody) {
+		  	if (body != self.lastBody && self.events['change']) {
+
+		  		var changeEvents = self.events['change'];
+		  		for(var i=0; i<changeEvents.length; i++) {
+		  			if (!changeEvents[i].selector) {
+		  				changeEvents[i].callback(body, self.lastBody);
+		  				break;
+		  			}
+		  		}
+		  		self.lastBody = body;
+
 		  		if (self.events['change'] && self.events['change'].length > 0) {
 
-   					var document = jsdom.jsdom(body);
-    				var window = document.createWindow();
-						var changeEvents = self.events['change'];
-			  			
-		  			for(var i=0; i<changeEvents.length; i++) {
+		  			var jsdom    = require("jsdom").jsdom,
+						    document = jsdom(body, null, { features: { QuerySelector : true	}}), 
+						    window   = document.createWindow();
 
-		  				var result = window.document.querySelector(changeEvents[i].selector);
+		  			for(var i=0; i<changeEvents.length; i++) {
+		  				
+		  				var result = window.document.querySelectorAll(changeEvents[i].selector);
 		  				var lastResult = changeEvents[i].lastResult;
 		  				
 		  				if (result != lastResult){
-		  					self.events["change"][i].callback(result, lastResult);
-		  					self.events["change"][i].lastResult = result;
+		  					changeEvents[i].callback(result, lastResult);
+		  					if (changeEvents[i])
+		  						changeEvents[i].lastResult = result;
 		  				}
-
 		  			}
-						
+
 		  			window.close();
 					}
 				}

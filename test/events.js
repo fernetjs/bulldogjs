@@ -5,7 +5,7 @@ describe('Events', function(){
   var dog, 
       testServer = require('http').createServer(function (req, res) {
         res.writeHead(200, {'Content-Type': 'text/plain'});
-        res.end('TEST :D\n');
+        res.end('<html><body><span>HOLA</span></body></html>');
       });
   
   beforeEach(function(){
