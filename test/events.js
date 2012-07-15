@@ -77,9 +77,12 @@ describe('Events', function(){
     it('should allow to add and remove the handler for calls providing selectors', function(done){
       var callsCount = 0;
       bulldog.watch('http://localhost:3001/', 100, function(error, puppy){
-        setTimeout(function(){ currentResponse = bodyResponses.unicornication; }, 150);
+        setTimeout(function(){ 
+          currentResponse = bodyResponses.unicornication; 
+        }, 150);
+
         setTimeout(function(){
-          callsCount.should.equal(0);
+          callsCount.should.equal(1);
           done();
         }, 350);
         
@@ -106,23 +109,23 @@ describe('Events', function(){
 
         puppy.on('change', '#cats', function(){
           catsCallsCount++;
-          puppy.off('change', '#content');
+          puppy.off('change', '#cats');
         });
 
         puppy.on('change', '#unicorns', function(){
           unicornsCallsCount++;
-          puppy.off('change', '#content');
+          puppy.off('change', '#unicorns');
         });
 
         puppy.on('change', function(){
-          unicornsCallsCount++;
-          puppy.off('change', '#content');
+          generalCallsCount++;
         });
 
         setTimeout(function(){
           catsCallsCount.should.equal(1);
           unicornsCallsCount.should.equal(1);
           generalCallsCount.should.equal(2);
+          puppy.off('change');
           currentResponse = bodyResponses.base; 
           done();
         }, 350);
