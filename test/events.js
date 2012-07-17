@@ -46,15 +46,32 @@ describe('Events', function(){
         done();
       });
     });
-    //this test is sync because we don't intend to test functionality here
+    it('should allow to suscribe as bark too', function(done){
+      setTimeout(function(){ currentResponse = bodyResponses.catification; }, 150);
+      dog.on('bark', function(obj){
+        should.exist(obj);
+        dog.off('bark');
+        currentResponse = bodyResponses.base;
+        done();
+      });
+    });
+    
     it('should allow to be called with "change", callback', function(){
       dog.on('change', function(obj){});
       dog.off('change');
     });
-    //this test is sync because we don't intend to test functionality here
+    it('should allow to be called with "bark", callback', function(){
+      dog.on('bark', function(obj){});
+      dog.off('bark');
+    });
+    
     it('should allow to be called with "change", "selector", callback', function(){
       dog.on('change', 'div.info', function(obj){});
       dog.off('change', 'div.info');
+    });
+    it('should allow to be called with "bark", "selector", callback', function(){
+      dog.on('bark', 'div.info', function(obj){});
+      dog.off('bark', 'div.info');
     });
     it('should allow to add and remove the handler', function(done){
       var callsCount = 0;
@@ -146,10 +163,18 @@ describe('Events', function(){
         done();
       }); 
     });
+    it('should allow to suscribe as sniff too', function(done){
+      dog.on('sniff', function(obj){
+        should.exist(obj);
+        dog.off('sniff');
+        done();
+      }); 
+    });
   });
 
   describe('error', function(){
     it('should ONLY be called in case of HTTP error responses');
+    it('should allow to suscribe as poop too');
   });
 
 });
