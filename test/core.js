@@ -3,14 +3,15 @@ var should = require('should'),
   Dog = require('../lib/dog.js');
 
 describe('Bulldog', function(){
-  var testServer;
+  var testServer,
+    serverPort = 3001;
 
   before(function(){
     testServer = require('http').createServer(function (req, res) {
       res.writeHead(200, {'Content-Type': 'text/html'});
       res.end('<html><body></body></html>');
     });
-    testServer.listen(3001, '127.0.0.1');
+    testServer.listen(serverPort, '127.0.0.1');
   });
   
   after(function(){
@@ -20,7 +21,7 @@ describe('Bulldog', function(){
   describe('#watch()', function(){
 
     it('should return a dog', function(done){
-      bulldog.watch('http://localhost:3001', 10000, function(error, dog){
+      bulldog.watch('http://localhost:' + serverPort, 10000, function(error, dog){
         should.not.exist(error);
         dog.should.be.an.instanceof(Dog);
         done();
@@ -36,7 +37,7 @@ describe('Bulldog', function(){
     });
 
     it('should return an error when interval is not a number', function(done){
-      bulldog.watch('http://localhost:3001', '10000', function(error, dog){
+      bulldog.watch('http://localhost:' + serverPort, '10000', function(error, dog){
         should.exist(error);
         should.not.exist(dog);
         done();
@@ -44,12 +45,12 @@ describe('Bulldog', function(){
     });
 
     it('should receive an url and an interval in ms', function(done){
-    	bulldog.watch('http://localhost:3001', 10000, function(error, dog){
+      bulldog.watch('http://localhost:' + serverPort, 10000, function(error, dog){
         should.not.exist(error);
-      	dog.url.should.be.a('string');
-      	dog.url.should.equal('http://localhost:3001');
-      	dog.interval.should.be.a('number');
-      	dog.interval.should.equal(10000);
+        dog.url.should.be.a('string');
+        dog.url.should.equal('http://localhost:' + serverPort);
+        dog.interval.should.be.a('number');
+        dog.interval.should.equal(10000);
         done();
       });
     });
@@ -60,9 +61,12 @@ describe('Bulldog', function(){
 
   describe('#stopWatching()', function(){
     it('should stop making requests', function (done){
-      var timesCalled = 0;
-      
-      bulldog.watch('http://localhost:3001/try1', 500, function(error, dog){
+      var timesCalled = 0,
+        step = 500,
+        halfStep = step / 2,
+        twoTimes = 2;
+        
+      bulldog.watch('http://localhost:' + serverPort + '/try1', step, function(error, dog){
         should.not.exist(error);
         should.exist(dog);
 
@@ -72,7 +76,7 @@ describe('Bulldog', function(){
 
       });
 
-      bulldog.watch('http://localhost:3001/try2', 500, function(error, dog){
+      bulldog.watch('http://localhost:' + serverPort + '/try2', step, function(error, dog){
         should.not.exist(error);
         should.exist(dog);
 
@@ -86,20 +90,24 @@ describe('Bulldog', function(){
         bulldog.stopWatching();
 
         setTimeout(function(){
-          timesCalled.should.be.equal(2);
+          timesCalled.should.be.equal(twoTimes);
           done();
-        }, 1000);
+        }, (step*twoTimes));
 
-      }, 600);
+      }, step + halfStep);
       
     });
   });
 
   describe('#resumeWatching()', function(){
     it('should resume making requests', function (done){
-      var timesCalled = 0;
+      var timesCalled = 0,
+        step = 50,
+        twoSteps = step * 2,
+        halfStep = step / 2,
+        twoTimes = 2;
       
-      bulldog.watch('http://localhost:3001/try1', 50, function(error, dog){
+      bulldog.watch('http://localhost:' + serverPort + '/try1', step, function(error, dog){
         should.not.exist(error);
         should.exist(dog);
 
@@ -109,7 +117,7 @@ describe('Bulldog', function(){
 
       });
 
-      bulldog.watch('http://localhost:3001/try2', 50, function(error, dog){
+      bulldog.watch('http://localhost:' + serverPort + '/try2', step, function(error, dog){
         should.not.exist(error);
         should.exist(dog);
 
@@ -123,18 +131,18 @@ describe('Bulldog', function(){
         bulldog.stopWatching();
 
         setTimeout(function(){
-          timesCalled.should.be.equal(4);
+          timesCalled.should.be.equal(twoTimes*2);
 
           bulldog.resumeWatching();          
 
           setTimeout(function(){
-            timesCalled.should.be.equal(6);
+            timesCalled.should.be.equal(twoTimes*2 + twoTimes);
             done();
-          }, 90);
+          }, step + halfStep);
 
-        }, 30);
+        }, halfStep);
 
-      }, 120);
+      }, (twoSteps + halfStep));
       
     });
   });
