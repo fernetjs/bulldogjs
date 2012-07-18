@@ -3,25 +3,26 @@ var should = require('should'),
   Dog = require('../lib/dog.js');
 
 describe('Bulldog', function(){
-  var testServer,
-    serverPort = 3001;
-
-  before(function(){
+  var serverPort = 3001,
     testServer = require('http').createServer(function (req, res) {
       res.writeHead(200, {'Content-Type': 'text/html'});
       res.end('<html><body></body></html>');
     });
+
+  before(function(){
     testServer.listen(serverPort, '127.0.0.1');
   });
   
   after(function(){
-    testServer.close();
+    try {
+      testServer.close();
+    }catch(e){}
   });
 
   describe('#watch()', function(){
 
     it('should return a dog', function(done){
-      bulldog.watch('http://localhost:' + serverPort, 10000, function(error, dog){
+      bulldog.watch('http://localhost:' + serverPort, 100, function(error, dog){
         should.not.exist(error);
         dog.should.be.an.instanceof(Dog);
         done();
@@ -29,7 +30,7 @@ describe('Bulldog', function(){
     });
 
     it('should return an error when URL is wrong', function(done){
-      bulldog.watch('thisIsNotAnURL', 10000, function(error, dog){
+      bulldog.watch('thisIsNotAnURL', 100, function(error, dog){
         should.exist(error);
         should.not.exist(dog);
         done();
@@ -45,12 +46,12 @@ describe('Bulldog', function(){
     });
 
     it('should receive an url and an interval in ms', function(done){
-      bulldog.watch('http://localhost:' + serverPort, 10000, function(error, dog){
+      bulldog.watch('http://localhost:' + serverPort, 100, function(error, dog){
         should.not.exist(error);
         dog.url.should.be.a('string');
         dog.url.should.equal('http://localhost:' + serverPort);
         dog.interval.should.be.a('number');
-        dog.interval.should.equal(10000);
+        dog.interval.should.equal(100);
         done();
       });
     });
@@ -91,6 +92,7 @@ describe('Bulldog', function(){
 
         setTimeout(function(){
           timesCalled.should.be.equal(twoTimes);
+          bulldog.stopWatching();
           done();
         }, (step*twoTimes));
 
@@ -137,6 +139,7 @@ describe('Bulldog', function(){
 
           setTimeout(function(){
             timesCalled.should.be.equal(twoTimes*2 + twoTimes);
+            bulldog.stopWatching();
             done();
           }, step + halfStep);
 

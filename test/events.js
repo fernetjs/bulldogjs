@@ -15,29 +15,34 @@ describe('Events', function(){
       res.end(currentResponse);
     });
   
-  beforeEach(function(done){
+  before(function(){
     testServer.listen(serverPort, '127.0.0.1');
+  });
+
+  beforeEach(function(done){
     bulldog.watch('http://localhost:' + serverPort, 1000, function(error, theDog){
       dog = theDog;
       done();
     });
   });
   
-  afterEach(function(){
-    testServer.close();
+  after(function(){
+    try {
+      testServer.close();
+    }catch(e){}
   });
 
   describe('#on()', function(){
     it('should allow us to subscribe to "look", "change" and "error"', function(done){
       bulldog.watch('http://localhost:' + serverPort, 1000, function(error, dog){
         dog.on('look', function(){
-
+          dog.off('look');
         });
         dog.on('change', function(){
-          
+          dog.off('change');
         });
         dog.on('error', function(){
-          
+          dog.off('error');
         });
         done();
       });
@@ -45,13 +50,13 @@ describe('Events', function(){
     it('should allow us to subscribe to "sniff", "bark" and "poop"', function(done){
       bulldog.watch('http://localhost:' + serverPort, 1000, function(error, dog){
         dog.on('sniff', function(){
-
+          dog.off('sniff');
         });
         dog.on('bark', function(){
-          
+          dog.off('bark');
         });
         dog.on('poop', function(){
-          
+          dog.off('poop');
         });
         done();
       });
@@ -84,7 +89,25 @@ describe('Events', function(){
       });
     });
 
-    it('should unsuscribe to a given event');
+    it('should unsuscribe to a given event', function(done){
+      var wasCalled = false;
+
+      bulldog.watch('http://localhost:' + serverPort, 500, function(error, dog){
+        setTimeout(function(){ currentResponse = bodyResponses.catification; }, 250);
+
+        dog.on('look', function(){
+          wasCalled = true;
+        });
+
+        dog.off('look');
+
+        setTimeout(function(){
+          wasCalled.should.not.equal(true);
+          currentResponse = bodyResponses.base;
+          done();
+        }, 600);
+      });
+    });
 
     it('should throw an error if the event name does not exist', function(done){
       bulldog.watch('http://localhost:' + serverPort, 1000, function(error, dog){
@@ -224,10 +247,93 @@ describe('Events', function(){
         
       });
     });
-    it('should be called if something changed');
-    it('should NOT be called if things remain the same');
-    it('should be called if something changed for matched selector');
-    it('should NOT be called if things remain the same for matched selector');
+    it('should be called if something changed with before and after states', function(done){
+      bulldog.watch('http://localhost:' + serverPort, step, function(error, puppy){
+
+        setTimeout(function(){ 
+          currentResponse = bodyResponses.catification; 
+        }, halfStep);
+
+        puppy.on('change', function(result){
+          should.exist(result.before);
+          should.exist(result.after);
+
+          result.before.should.equal(bodyResponses.base);
+          result.after.should.equal(bodyResponses.catification);
+
+          currentResponse = bodyResponses.base;
+          puppy.off('change');
+          done();
+        });
+
+      });
+    });
+    it('should NOT be called if things remain the same',function(done){
+      var wasCalled = false;
+      bulldog.watch('http://localhost:' + serverPort, step, function(error, puppy){
+
+        setTimeout(function(){
+          wasCalled.should.equal(false);
+          puppy.off('look').off('change');
+          done();
+        }, twoSteps + halfStep);
+
+        puppy.on('look', function(result){
+          should.exist(result);
+          result.should.equal(bodyResponses.base);
+        });
+
+        puppy.on('change', function(result){
+          wasCalled = true;
+        });
+
+      });
+    });
+    it('should be called if something changed for matched selector with before and after states', function(done){
+      var catsBefore = '<span id="cats">catssss</span>';
+      var catsAfter = '<span id="cats">cat cat cat cat</span>';
+
+      bulldog.watch('http://localhost:' + serverPort, step, function(error, puppy){
+
+        setTimeout(function(){ 
+          currentResponse = bodyResponses.catification; 
+        }, halfStep);
+
+        puppy.on('change', '#cats', function(result){
+          should.exist(result.before);
+          should.exist(result.after);
+
+          result.before.should.eql(catsBefore);
+          result.after.should.eql(catsAfter);
+
+          currentResponse = bodyResponses.base;
+          puppy.off('change', '#cats');
+          done();
+        });
+
+      });
+    });
+    it('should NOT be called if things remain the same for matched selector',function(done){
+      var wasCalled = false;
+      bulldog.watch('http://localhost:' + serverPort, step, function(error, puppy){
+
+        setTimeout(function(){
+          wasCalled.should.equal(false);
+          puppy.off('look').off('change', '#cats');
+          done();
+        }, twoSteps + halfStep);
+
+        puppy.on('look', function(result){
+          should.exist(result);
+          result.should.equal(bodyResponses.base);
+        });
+
+        puppy.on('change', '#cats', function(result){
+          wasCalled = true;
+        });
+
+      });
+    });
   });
   
   describe('look', function(){
@@ -244,6 +350,16 @@ describe('Events', function(){
         dog.off('sniff');
         done();
       }); 
+    });
+    it('should pass the content of the site to the callback', function(done){
+      bulldog.watch('http://localhost:' + serverPort, 100, function(error, puppy){
+
+        puppy.on('look', function(result){
+          should.exist(result);
+          result.should.equal(bodyResponses.base);
+          done();
+        });
+      });
     });
   });
 
