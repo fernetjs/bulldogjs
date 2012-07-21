@@ -247,7 +247,7 @@ describe('Events', function(){
         
       });
     });
-    it('should be called if something changed with before and after states', function(done){
+    it('should be called if something changed with before and now states', function(done){
       bulldog.watch('http://localhost:' + serverPort, step, function(error, puppy){
 
         setTimeout(function(){ 
@@ -256,10 +256,10 @@ describe('Events', function(){
 
         puppy.on('change', function(result){
           should.exist(result.before);
-          should.exist(result.after);
+          should.exist(result.now);
 
           result.before.should.equal(bodyResponses.base);
-          result.after.should.equal(bodyResponses.catification);
+          result.now.should.equal(bodyResponses.catification);
 
           currentResponse = bodyResponses.base;
           puppy.off('change');
@@ -289,7 +289,7 @@ describe('Events', function(){
 
       });
     });
-    it('should be called if something changed for matched selector with before and after states', function(done){
+    it('should be called if something changed for matched selector with before and now states', function(done){
       var catsBefore = '<span id="cats">catssss</span>';
       var catsAfter = '<span id="cats">cat cat cat cat</span>';
 
@@ -301,10 +301,10 @@ describe('Events', function(){
 
         puppy.on('change', '#cats', function(result){
           should.exist(result.before);
-          should.exist(result.after);
+          should.exist(result.now);
 
           result.before.should.equal(catsBefore);
-          result.after.should.equal(catsAfter);
+          result.now.should.equal(catsAfter);
 
           currentResponse = bodyResponses.base;
           puppy.off('change', '#cats');
