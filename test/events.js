@@ -303,8 +303,8 @@ describe('Events', function(){
           should.exist(result.before);
           should.exist(result.after);
 
-          result.before.should.eql(catsBefore);
-          result.after.should.eql(catsAfter);
+          result.before.should.equal(catsBefore);
+          result.after.should.equal(catsAfter);
 
           currentResponse = bodyResponses.base;
           puppy.off('change', '#cats');
