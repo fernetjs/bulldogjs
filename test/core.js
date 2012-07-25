@@ -5,8 +5,13 @@ var should = require('should'),
 describe('Bulldog', function(){
   var serverPort = 3001,
     testServer = require('http').createServer(function (req, res) {
+      
       res.writeHead(200, {'Content-Type': 'text/html'});
-      res.end('<html><body></body></html>');
+
+      if (req.method.toUpperCase() === 'POST'){
+        res.end('<html><body><h1>Was a POST!</h1></body></html>');
+      }
+      else res.end('<html><body></body></html>');
     });
 
   before(function(){
@@ -56,8 +61,33 @@ describe('Bulldog', function(){
       });
     });
     
-    it('should allow an optional 3rd parameter for http request options'); 
-    it('should make GET requests when no options is provided');
+    it('should allow first parameter to be an object for http request options', function(done){
+      bulldog.watch({
+        url: 'http://localhost:' + serverPort,
+        method: 'POST'
+      }, 100, function(error, dog){
+        should.not.exist(error);
+        
+        dog.on('look', function(data){
+          data.should.equal('<html><body><h1>Was a POST!</h1></body></html>');
+          dog.off('look');
+          done();
+        });
+      });
+    });
+
+    it('should make GET requests when no options is provided', function(done){
+      bulldog.watch('http://localhost:' + serverPort, 100, function(error, dog){
+        should.not.exist(error);
+        
+        dog.on('look', function(data){
+          data.should.equal('<html><body></body></html>');
+          dog.off('look');
+          done();
+        });
+      });
+    });
+
   });
 
   describe('#stopWatching()', function(){
