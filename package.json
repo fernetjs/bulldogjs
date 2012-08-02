@@ -10,7 +10,8 @@
   },
   "devDependencies": {
     "mocha": "*",
-    "should": "*"
+    "should": "*",
+    "put-selector": "0.2.0"
   },
   "directories": { 
     "lib" : "./lib"
