@@ -6,7 +6,7 @@
   "homepage": "http://some-domain.com",
   "dependencies": {
     "request": "2.9.x",
-    "cheerio": "0.2.x"
+    "cheerio": "0.9.x"
   },
   "devDependencies": {
     "mocha": "*",
