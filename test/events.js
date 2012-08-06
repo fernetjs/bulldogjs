@@ -290,8 +290,8 @@ describe('Events', function(){
       });
     });
     it('should be called if something changed for matched selector with before and now states', function(done){
-      var catsBefore = '<span id="cats">catssss</span>';
-      var catsAfter = '<span id="cats">cat cat cat cat</span>';
+      var catsBefore = 'catssss';
+      var catsAfter = 'cat cat cat cat';
 
       bulldog.watch('http://localhost:' + serverPort, step, function(error, puppy){
 
