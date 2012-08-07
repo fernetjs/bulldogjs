@@ -5,9 +5,13 @@ describe('Events', function(){
   var dog,
     serverPort = 3001,
     bodyResponses = {
-      base: '<html><body><span id="cats">catssss</span><span id="unicorns">unicornssss</span></body></html>',
+      base: '<html><body><span id="cats">catssss</span><span id="unicorns">unicornssss</span><ul id="animals"><li>cat</li><li>unicorn</li><li>dog</li></ul></body></html>',
       catification: '<html><body><span id="cats">cat cat cat cat</span><span id="unicorns">unicornssss</span></body></html>',
-      unicornication: '<html><body><span id="cats">catssss</span><span id="unicorns">unicorns. just unicorns.</span></body></html>'
+      unicornication: '<html><body><span id="cats">catssss</span><span id="unicorns">unicorns. just unicorns.</span></body></html>',
+
+      baseList: '<html><body><ul id="animals"><li>cat</li><li>unicorn</li><li>dog</li></ul></body></html>',
+      changeListContent: '<html><body><ul id="animals"><li>cat</li><li>rhino</li><li>dog</li></ul></body></html>',
+      changeListLength: '<html><body><ul id="animals"><li>cat</li><li>dog</li></ul></body></html>'
     },
     currentResponse = bodyResponses.base,
     testServer = require('http').createServer(function (req, res) {
@@ -258,6 +262,9 @@ describe('Events', function(){
           should.exist(result.before);
           should.exist(result.now);
 
+          result.before.should.be.a('string');
+          result.now.should.be.a('string');
+
           result.before.should.equal(bodyResponses.base);
           result.now.should.equal(bodyResponses.catification);
 
@@ -280,7 +287,7 @@ describe('Events', function(){
 
         puppy.on('look', function(result){
           should.exist(result);
-          result.should.equal(bodyResponses.base);
+          result.should.be.a('string').and.equal(bodyResponses.base);
         });
 
         puppy.on('change', function(result){
@@ -303,12 +310,62 @@ describe('Events', function(){
           should.exist(result.before);
           should.exist(result.now);
 
-          result.before.should.equal(catsBefore);
-          result.now.should.equal(catsAfter);
+          result.before.should.be.an.instanceOf(Array).with.lengthOf(1);
+          result.now.should.be.an.instanceOf(Array).with.lengthOf(1);
+
+          result.before[0].should.be.a('string').and.equal(catsBefore);
+          result.now[0].should.be.a('string').and.equal(catsAfter);
 
           currentResponse = bodyResponses.base;
           puppy.off('change', '#cats');
           done();
+        });
+
+      });
+    });
+    it('should be called if elements content or length changed for a matched selector', function(done){
+      var contentBefore = "unicorn",
+        contentNow = "rhino";
+
+      currentResponse = bodyResponses.baseList; 
+
+      bulldog.watch('http://localhost:' + serverPort, step, function(error, puppy){
+
+        setTimeout(function(){ 
+          currentResponse = bodyResponses.changeListContent; 
+
+          setTimeout(function(){ 
+            currentResponse = bodyResponses.changeListLength;
+
+            setTimeout(function(){ 
+              times.should.equal(2);
+              currentResponse = bodyResponses.base;
+              puppy.off('change', '#animals li');
+              done();
+
+            }, step);
+          }, step);
+        }, halfStep);
+
+        var times = 0;
+        puppy.on('change', '#animals li', function(result){
+          should.exist(result.before);
+          should.exist(result.now);
+
+          if (times === 0){
+            result.before.should.be.an.instanceOf(Array).with.lengthOf(3);
+            result.now.should.be.an.instanceOf(Array).with.lengthOf(3);
+
+            result.before[1].should.equal(contentBefore);
+            result.now[1].should.equal(contentNow);
+
+            times++;
+          }
+          else if (times === 1){
+            result.before.should.be.an.instanceOf(Array).with.lengthOf(3);
+            result.now.should.be.an.instanceOf(Array).with.lengthOf(2); 
+            times++;
+          }
         });
 
       });
@@ -325,7 +382,7 @@ describe('Events', function(){
 
         puppy.on('look', function(result){
           should.exist(result);
-          result.should.equal(bodyResponses.base);
+          result.should.be.a('string').and.equal(bodyResponses.base);
         });
 
         puppy.on('change', '#cats', function(result){
