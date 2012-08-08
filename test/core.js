@@ -7,13 +7,11 @@ var should = require('should'),
 describe('Bulldog', function(){
 
   before(function(){
-    testServer.listen(SERVER_PORT, '127.0.0.1');
-  });
-  
-  after(function(){
     try {
       testServer.close();
     }catch(e){}
+
+    testServer.listen(SERVER_PORT, '127.0.0.1');
   });
 
   describe('#watch()', function(){

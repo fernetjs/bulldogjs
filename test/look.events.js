@@ -8,15 +8,8 @@ describe('look', function(){
   
   beforeEach(function(){
     testServer.currentResponse = baseResponse;
-    testServer.listen(SERVER_PORT, '127.0.0.1');
   });
   
-  afterEach(function(){
-    try {
-      testServer.close();
-    }catch(e){}
-  });
-
   it('should pass something to the callback (cannot be null)', function(done){
     bulldog.watch('http://localhost:' + SERVER_PORT, 100, function(error, dog){
       dog.on('look', function(obj){
@@ -40,6 +33,7 @@ describe('look', function(){
       puppy.on('look', function(result){
         should.exist(result);
         result.should.equal(baseResponse);
+        puppy.off('look');
         done();
       });
     });

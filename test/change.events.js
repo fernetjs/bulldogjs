@@ -23,15 +23,8 @@ describe('change', function(){
     
   beforeEach(function(){
     testServer.currentResponse = baseResponse;
-    testServer.listen(SERVER_PORT, '127.0.0.1');
   });
   
-  afterEach(function(){
-    try {
-      testServer.close();
-    }catch(e){}
-  }); 
-
   describe('basic usage', function(){
     
     afterEach(function(){

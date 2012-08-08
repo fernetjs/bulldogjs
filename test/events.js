@@ -8,15 +8,8 @@ describe('Events', function(){
   
   beforeEach(function(){
     testServer.currentResponse = baseResponse;
-    testServer.listen(SERVER_PORT, '127.0.0.1');
   });
   
-  afterEach(function(){
-    try {
-      testServer.close();
-    }catch(e){}
-  });
-
   describe('#on()', function(){
     it('should allow us to subscribe to "look", "change" and "error"', function(done){
       bulldog.watch('http://localhost:' + SERVER_PORT, 1000, function(error, dog){
