@@ -1,36 +1,17 @@
 var should = require('should'),
-  bulldog = require('../lib/bulldog.js');
+  bulldog = require('../lib/bulldog.js')
+  testServer = require('./test-util/testserver.js'),
+  SERVER_PORT = 3001;
 
 describe('Events', function(){
-  var dog,
-    serverPort = 3001,
-    bodyResponses = {
-      base: '<html><body><span id="cats">catssss</span><span id="unicorns">unicornssss</span><ul id="animals"><li>cat</li><li>unicorn</li><li>dog</li></ul></body></html>',
-      catification: '<html><body><span id="cats">cat cat cat cat</span><span id="unicorns">unicornssss</span></body></html>',
-      unicornication: '<html><body><span id="cats">catssss</span><span id="unicorns">unicorns. just unicorns.</span></body></html>',
-
-      baseList: '<html><body><ul id="animals"><li>cat</li><li>unicorn</li><li>dog</li></ul></body></html>',
-      changeListContent: '<html><body><ul id="animals"><li>cat</li><li>rhino</li><li>dog</li></ul></body></html>',
-      changeListLength: '<html><body><ul id="animals"><li>cat</li><li>dog</li></ul></body></html>'
-    },
-    currentResponse = bodyResponses.base,
-    testServer = require('http').createServer(function (req, res) {
-      res.writeHead(200, {'Content-Type': 'text/html'});
-      res.end(currentResponse);
-    });
+  var baseResponse = '<html><body><span id="cats">catssss</span><span id="unicorns">unicornssss</span><ul id="animals"><li>cat</li><li>unicorn</li><li>dog</li></ul></body></html>';
   
-  before(function(){
-    testServer.listen(serverPort, '127.0.0.1');
-  });
-
-  beforeEach(function(done){
-    bulldog.watch('http://localhost:' + serverPort, 1000, function(error, theDog){
-      dog = theDog;
-      done();
-    });
+  beforeEach(function(){
+    testServer.currentResponse = baseResponse;
+    testServer.listen(SERVER_PORT, '127.0.0.1');
   });
   
-  after(function(){
+  afterEach(function(){
     try {
       testServer.close();
     }catch(e){}
@@ -38,7 +19,7 @@ describe('Events', function(){
 
   describe('#on()', function(){
     it('should allow us to subscribe to "look", "change" and "error"', function(done){
-      bulldog.watch('http://localhost:' + serverPort, 1000, function(error, dog){
+      bulldog.watch('http://localhost:' + SERVER_PORT, 1000, function(error, dog){
         dog.on('look', function(){
           dog.off('look');
         });
@@ -52,7 +33,7 @@ describe('Events', function(){
       });
     });
     it('should allow us to subscribe to "sniff", "bark" and "poop"', function(done){
-      bulldog.watch('http://localhost:' + serverPort, 1000, function(error, dog){
+      bulldog.watch('http://localhost:' + SERVER_PORT, 1000, function(error, dog){
         dog.on('sniff', function(){
           dog.off('sniff');
         });
@@ -66,7 +47,7 @@ describe('Events', function(){
       });
     });
     it('should throw an error if the event name does not exist', function(done){
-      bulldog.watch('http://localhost:' + serverPort, 1000, function(error, dog){
+      bulldog.watch('http://localhost:' + SERVER_PORT, 1000, function(error, dog){
         
         (function(){
           dog.on('dontExist', function(){ });
@@ -83,7 +64,7 @@ describe('Events', function(){
 
   describe('#off()', function(){
     it('can be called even if no handlers are attached', function(done){
-      bulldog.watch('http://localhost:' + serverPort, 1000, function(error, dog){
+      bulldog.watch('http://localhost:' + SERVER_PORT, 1000, function(error, dog){
 
         (function(){
           dog.off('look');
@@ -92,337 +73,21 @@ describe('Events', function(){
         done();
       });
     });
-
     it('should unsuscribe to a given event', function(done){
       var wasCalled = false;
-
-      bulldog.watch('http://localhost:' + serverPort, 500, function(error, dog){
-        setTimeout(function(){ currentResponse = bodyResponses.catification; }, 250);
+      bulldog.watch('http://localhost:' + SERVER_PORT, 50, function(error, dog){
 
         dog.on('look', function(){
           wasCalled = true;
         });
-
         dog.off('look');
 
         setTimeout(function(){
-          wasCalled.should.not.equal(true);
-          currentResponse = bodyResponses.base;
+          wasCalled.should.be.false;
           done();
-        }, 600);
+        }, 100);
       });
     });
-
-    it('should throw an error if the event name does not exist', function(done){
-      bulldog.watch('http://localhost:' + serverPort, 1000, function(error, dog){
-        
-        (function(){
-          dog.off('dontExist');
-        }).should.throw("Event name 'dontExist' not supported");
-
-        (function(){
-          dog.off('thisNeither');
-        }).should.throw("Event name 'thisNeither' not supported");
-        
-        done();
-      });
-    });
-  });
-
-  describe('change', function(){
-     var timesCalled = 0,
-        step = 100,
-        twoSteps = step * 2,
-        halfStep = step / 2,
-        oneTime = 1,
-        twoTimes = oneTime * 2;
-
-    it('should pass something to the callback (cannot be null)', function(done){
-      setTimeout(function(){ currentResponse = bodyResponses.catification; }, 150);
-      dog.on('change', function(obj){
-        should.exist(obj);
-        dog.off('change');
-        currentResponse = bodyResponses.base;
-        done();
-      });
-    });
-    it('should allow to suscribe as bark too', function(done){
-      setTimeout(function(){ currentResponse = bodyResponses.catification; }, 150);
-      dog.on('bark', function(obj){
-        should.exist(obj);
-        dog.off('bark');
-        currentResponse = bodyResponses.base;
-        done();
-      });
-    });
-    
-    it('should allow to be called with "change", callback', function(){
-      dog.on('change', function(obj){});
-      dog.off('change');
-    });
-    it('should allow to be called with "bark", callback', function(){
-      dog.on('bark', function(obj){});
-      dog.off('bark');
-    });
-    
-    it('should allow to be called with "change", "selector", callback', function(){
-      dog.on('change', 'div.info', function(obj){});
-      dog.off('change', 'div.info');
-    });
-    it('should allow to be called with "bark", "selector", callback', function(){
-      dog.on('bark', 'div.info', function(obj){});
-      dog.off('bark', 'div.info');
-    });
-    it('should allow to add and remove the handler', function(done){
-      timesCalled = 0;
-
-      bulldog.watch('http://localhost:' + serverPort, step, function(error, puppy){
-        setTimeout(function(){ currentResponse = bodyResponses.catification; }, step + halfStep);
-        
-        setTimeout(function(){
-          timesCalled.should.equal(oneTime);
-          done();
-        }, twoSteps + halfStep);
-
-        puppy.on('change', function(){
-          timesCalled++;
-          puppy.off('change');
-          currentResponse = bodyResponses.base;
-        });
-
-      });
-    });
-    it('should allow to add and remove the handler for calls providing selectors', function(done){
-      timesCalled = 0;
-
-      bulldog.watch('http://localhost:' + serverPort, step, function(error, puppy){
-        setTimeout(function(){ 
-          currentResponse = bodyResponses.unicornication; 
-        }, step + halfStep);
-
-        setTimeout(function(){
-          timesCalled.should.equal(oneTime);
-          done();
-        }, twoSteps + halfStep);
-        
-        puppy.on('change', '#unicorns', function(){
-          timesCalled++;
-          puppy.off('change', '#unicorns');
-          currentResponse = bodyResponses.base;
-        });
-      });
-    });
-    it('should handle each change event for each selector independently', function(done){
-      var catsCallsCount = 0,
-        unicornsCallsCount = 0,
-        generalCallsCount = 0;
-      
-      bulldog.watch('http://localhost:' + serverPort, step, function(error, puppy){
-
-        setTimeout(function(){ 
-          currentResponse = bodyResponses.catification; 
-          setTimeout(function(){ 
-            currentResponse = bodyResponses.unicornication; 
-          }, step);
-        }, halfStep);
-
-        puppy.on('change', '#cats', function(){
-          catsCallsCount++;
-          puppy.off('change', '#cats');
-        });
-
-        puppy.on('change', '#unicorns', function(){
-          unicornsCallsCount++;
-          puppy.off('change', '#unicorns');
-        });
-
-        puppy.on('change', function(){
-          generalCallsCount++;
-        });
-
-        setTimeout(function(){
-          catsCallsCount.should.equal(oneTime);
-          unicornsCallsCount.should.equal(oneTime);
-          generalCallsCount.should.equal(twoTimes);
-          puppy.off('change');
-          currentResponse = bodyResponses.base; 
-          done();
-        }, twoSteps + halfStep);
-        
-      });
-    });
-    it('should be called if something changed with before and now states', function(done){
-      bulldog.watch('http://localhost:' + serverPort, step, function(error, puppy){
-
-        setTimeout(function(){ 
-          currentResponse = bodyResponses.catification; 
-        }, halfStep);
-
-        puppy.on('change', function(result){
-          should.exist(result.before);
-          should.exist(result.now);
-
-          result.before.should.be.a('string');
-          result.now.should.be.a('string');
-
-          result.before.should.equal(bodyResponses.base);
-          result.now.should.equal(bodyResponses.catification);
-
-          currentResponse = bodyResponses.base;
-          puppy.off('change');
-          done();
-        });
-
-      });
-    });
-    it('should NOT be called if things remain the same',function(done){
-      var wasCalled = false;
-      bulldog.watch('http://localhost:' + serverPort, step, function(error, puppy){
-
-        setTimeout(function(){
-          wasCalled.should.equal(false);
-          puppy.off('look').off('change');
-          done();
-        }, twoSteps + halfStep);
-
-        puppy.on('look', function(result){
-          should.exist(result);
-          result.should.be.a('string').and.equal(bodyResponses.base);
-        });
-
-        puppy.on('change', function(result){
-          wasCalled = true;
-        });
-
-      });
-    });
-    it('should be called if something changed for matched selector with before and now states', function(done){
-      var catsBefore = 'catssss';
-      var catsAfter = 'cat cat cat cat';
-
-      bulldog.watch('http://localhost:' + serverPort, step, function(error, puppy){
-
-        setTimeout(function(){ 
-          currentResponse = bodyResponses.catification; 
-        }, halfStep);
-
-        puppy.on('change', '#cats', function(result){
-          should.exist(result.before);
-          should.exist(result.now);
-
-          result.before.should.be.an.instanceOf(Array).with.lengthOf(1);
-          result.now.should.be.an.instanceOf(Array).with.lengthOf(1);
-
-          result.before[0].should.be.a('string').and.equal(catsBefore);
-          result.now[0].should.be.a('string').and.equal(catsAfter);
-
-          currentResponse = bodyResponses.base;
-          puppy.off('change', '#cats');
-          done();
-        });
-
-      });
-    });
-    it('should be called if elements content or length changed for a matched selector', function(done){
-      var contentBefore = "unicorn",
-        contentNow = "rhino";
-
-      currentResponse = bodyResponses.baseList; 
-
-      bulldog.watch('http://localhost:' + serverPort, step, function(error, puppy){
-
-        setTimeout(function(){ 
-          currentResponse = bodyResponses.changeListContent; 
-
-          setTimeout(function(){ 
-            currentResponse = bodyResponses.changeListLength;
-
-            setTimeout(function(){ 
-              times.should.equal(2);
-              currentResponse = bodyResponses.base;
-              puppy.off('change', '#animals li');
-              done();
-
-            }, step);
-          }, step);
-        }, halfStep);
-
-        var times = 0;
-        puppy.on('change', '#animals li', function(result){
-          should.exist(result.before);
-          should.exist(result.now);
-
-          if (times === 0){
-            result.before.should.be.an.instanceOf(Array).with.lengthOf(3);
-            result.now.should.be.an.instanceOf(Array).with.lengthOf(3);
-
-            result.before[1].should.equal(contentBefore);
-            result.now[1].should.equal(contentNow);
-
-            times++;
-          }
-          else if (times === 1){
-            result.before.should.be.an.instanceOf(Array).with.lengthOf(3);
-            result.now.should.be.an.instanceOf(Array).with.lengthOf(2); 
-            times++;
-          }
-        });
-
-      });
-    });
-    it('should NOT be called if things remain the same for matched selector',function(done){
-      var wasCalled = false;
-      bulldog.watch('http://localhost:' + serverPort, step, function(error, puppy){
-
-        setTimeout(function(){
-          wasCalled.should.equal(false);
-          puppy.off('look').off('change', '#cats');
-          done();
-        }, twoSteps + halfStep);
-
-        puppy.on('look', function(result){
-          should.exist(result);
-          result.should.be.a('string').and.equal(bodyResponses.base);
-        });
-
-        puppy.on('change', '#cats', function(result){
-          wasCalled = true;
-        });
-
-      });
-    });
-  });
-  
-  describe('look', function(){
-    it('should pass something to the callback (cannot be null)', function(done){
-      dog.on('look', function(obj){
-        should.exist(obj);
-        dog.off('look');
-        done();
-      }); 
-    });
-    it('should allow to suscribe as sniff too', function(done){
-      dog.on('sniff', function(obj){
-        should.exist(obj);
-        dog.off('sniff');
-        done();
-      }); 
-    });
-    it('should pass the content of the site to the callback', function(done){
-      bulldog.watch('http://localhost:' + serverPort, 100, function(error, puppy){
-
-        puppy.on('look', function(result){
-          should.exist(result);
-          result.should.equal(bodyResponses.base);
-          done();
-        });
-      });
-    });
-  });
-
-  describe('error', function(){
-    it('should ONLY be called in case of HTTP error responses');
-    it('should allow to suscribe as poop too');
   });
 
 });

@@ -36,7 +36,7 @@ Or you can use the accessors to switch to some states:
     testServer.status.notFound();
     testServer.status.ok();
 
-##accessing the latest request the server got
+##accessing the last request the server responded to
 You can get the request object belonging to the latest request the server responded to. This might be useful for some assertions (?)
 
-    testServer.latestRequest
+    testServer.lastRequest

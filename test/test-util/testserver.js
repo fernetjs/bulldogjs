@@ -5,12 +5,12 @@ var put = require('put-selector'),
 module.exports = testServer = require('http').createServer(function (req, res) {
       res.writeHead(testServer.responseCode, {'Content-Type': 'text/html'});
       res.end(testServer.currentResponse);
-      testServer.latestRequest = req;
+      testServer.lastRequest = req;
     });
 
 testServer.currentResponse = '';
 testServer.responseCode = 200;
-testServer.latestRequest = null;
+testServer.lastRequest = null;
 
 testServer.change = function change(cssSelector, content){
   var contentToSet = content || generateRandomContent(),
